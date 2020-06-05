@@ -14,6 +14,12 @@ class ViewController: UIViewController {
     let audioEngine = AVAudioEngine() // we need an instance from audio engine to store the audio file.
     let audioSpeedControl = AVAudioUnitVarispeed() // we need an instance for property from audio engine that can control the audio speed  based on the audio node
     let audioPitchControl = AVAudioUnitTimePitch() // we need an instance for property from audio engine that can control the pitch based on the audio
+    let distortion = AVAudioUnitDistortion()
+    let reverb = AVAudioUnitReverb()
+//    let audioBuffer = AVAudioPCMBuffer()
+//    let outputFile = AVAudioFile()
+    let delay = AVAudioUnitDelay()
+    
     
     @IBOutlet weak var playButton: UIButton!
     
@@ -41,11 +47,17 @@ class ViewController: UIViewController {
         audioEngine.attach(audioPlayer)
         audioEngine.attach(audioPitchControl)
         audioEngine.attach(audioSpeedControl)
+        audioEngine.attach(distortion)
+        audioEngine.attach(reverb)
+        audioEngine.attach(delay)
 
         // We need to make sure our each component from audio property that we create before such as speed and pitch are not crash each other. Remember concept of the audio is like having a port for input port, and output port, so if we want to play and manipulate the audio based on the node, we have to arrange the parts so that output from one is input to another
         audioEngine.connect(audioPlayer, to: audioSpeedControl, format: nil)
         audioEngine.connect(audioSpeedControl, to: audioPitchControl, format: nil)
-        audioEngine.connect(audioPitchControl, to: audioEngine.mainMixerNode, format: nil)
+        audioEngine.connect(audioPitchControl, to: distortion, format: nil)
+        audioEngine.connect(distortion, to: reverb, format: nil)
+        audioEngine.connect(reverb, to: delay, format: nil)
+        audioEngine.connect(delay, to: audioEngine.mainMixerNode, format: nil)
 
         
         audioPlayer.scheduleFile(file, at: nil) // Last we need to prepare the player to play audio sequencially start from beginning to end
@@ -56,8 +68,10 @@ class ViewController: UIViewController {
     
     // Now let's try to manipulate audio whenever view being tapped, by increasing the number of pitch and speed of the audio based on the audio node
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        audioPitchControl.pitch += 50
+        audioPitchControl.pitch += 10
         audioSpeedControl.rate += 0.1
+        audioPitchControl.overlap += 10
+        distortion.wetDryMix += 50
     }
     
 }
