@@ -51,38 +51,6 @@ class ViewController: UIViewController {
 
 // MARK: Audio Control Button
 extension ViewController {
-    
-    // This is function to receive audio url, and ask audio engine to extract the file
-    func play(_ url: URL) throws {
-        // extract the audio file from given URL
-        let file = try AVAudioFile(forReading: url)
-        
-        // Make sure we prepare the node
-        let audioNode = AVAudioPlayerNode()
-        
-        // We need to tell the engine to connect all the component of node
-        audioEngine.attach(audioNode)
-        audioEngine.attach(audioPitch)
-        audioEngine.attach(audioSpeed)
-        audioEngine.attach(audioDistort)
-        audioEngine.attach(audioReverb)
-        audioEngine.attach(audioDelay)
-        
-        // we need to make sure our each unit audio component from audio property that we create such as speed, pitch, etc are not crash each other and creating a new chain of audio process.
-        audioEngine.connect(audioNode, to: audioSpeed, format: nil)
-        audioEngine.connect(audioSpeed, to: audioPitch, format: nil)
-        audioEngine.connect(audioPitch, to: audioReverb, format: nil)
-        audioEngine.connect(audioReverb, to: audioEngine.mainMixerNode, format: nil)
-        
-        //        audioEngine.connect(audioReverb, to: audioDistort, format: nil)
-        //        audioEngine.connect(audioDistort, to: audioSpeed, format: nil)
-        
-        audioNode.scheduleFile(file, at: nil) // Last we need to prepare the player to play audio node sequentially from start to beginning based on the chain structure of our node.
-        
-        try audioEngine.start()
-        audioNode.play()
-    }
-    
     func configAudioButton() {
         minusPitchButton.addTarget(self, action: #selector(minusPitch), for: .touchUpInside)
         plusPitchButton.addTarget(self, action: #selector(plusPitch), for: .touchUpInside)
@@ -105,45 +73,28 @@ extension ViewController {
     // Step 1, we need URL path of our resources
     @objc
     func playAction() {
-        guard let url = Bundle.main.url(forResource: "psotmalone", withExtension: "mp3") else { return }
-        do {
-            try play(url)
-        } catch let error {
-            print(error.localizedDescription)
-        }
+
     }
 
     
     @objc
     func minusPitch() {
-        audioPitch.pitch -= 10
-        DispatchQueue.main.async {
-            self.pitchProgress.progress -= 0.1
-        }
+
     }
     
     @objc
     func plusPitch() {
-        audioPitch.pitch += 10
-        DispatchQueue.main.async {
-            self.pitchProgress.progress += 0.1
-        }
+
     }
     
     @objc
     func minusSpeed() {
-        audioSpeed.rate -= 0.1
-        DispatchQueue.main.async {
-            self.speedProgress.progress -= 0.1
-        }
+
     }
     
     @objc
     func plusSpeed() {
-        audioSpeed.rate += 0.1
-        DispatchQueue.main.async {
-            self.speedProgress.progress += 0.1
-        }
+
     }
     
     @objc
